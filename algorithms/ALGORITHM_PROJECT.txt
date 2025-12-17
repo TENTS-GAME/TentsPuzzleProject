@@ -1,0 +1,101 @@
+blueprint of my algorithm
+Initially 
+1.traverse through the graph and find out cells where tents are adjacent or diagonal(eliminate these cells, it cannot be part of V in bipartite matching)
+2.traverse and find out if each of the tents placed are already adjacent to a tree, if yes add an edge between them. Ignore cells already adjacent to another tent.
+3.While placing a tent, prune rows/columns that already reached their edge number(Remove cells that cannot be assigned due to row/column limit). if not reached the edge number, those cells can be a part of the valid cells.
+If a row cannot possibly reach its required number, puzzle is impossible.
+--Now after all this we'll get a set of valid cells
+4.we should sort these cells according to the row column count i.e. 
+example
+Row 2 needs 1 tent , its cell gets highest priority
+Row 5 needs 3 tents , cells have lower priority
+cells that have fewer conflicts with other trees (i.e. fewer neighbors)are prioritized
+5.Sometimes, sorting trees by the number of candidate cells is also helpful
+Trees with fewer options are matched first
+
+Randomly (or using strategy) choose a valid cell to place a tent.
+If no valid cell exists → skip the tree
+**********************************************************************************************************************************************************************************
+
+THE FINAL GAME ALGORITHM
+
+In Tents & Trees, you are solving:
+
+Match each tree to exactly one adjacent cell (tent position)
+subject to constraints:
+: No two tents adjacent (even diagonally)
+: Row & column limits
+: Each tree gets exactly one tent
+So the core model is:
+
+Left side → Trees
+Right side → Valid empty cells
+Edge → Cell is adjacent (up/down/left/right) to that tree
+
+STEP 0: Representation 
+Grid → graph
+Trees are fixed nodes
+Empty cells are potential tent nodes
+
+STEP 1: Eliminate impossible cells
+Mark all empty cells that are:
+
+: Adjacent (8 directions) to an already placed tent
+: Outside the grid
+: Remove these cells from the candidate set
+
+STEP 2: Build adjacency (Tree ↔ Cell edges)
+For each tree, find all adjacent empty cells (up, down, left, right)
+From those, keep only cells that:
+
+Are not eliminated in Step 1
+Do not violate row/column limits
+Add an edge:
+Tree Ti → Cell Cj
+
+STEP 3: Row / Column pruning (constraint propagation)
+For each row and column:
+
+If tent count == limit:
+
+Remove all remaining empty cells in that row/column
+If
+current tents + remaining possible cells < required limit
+→ puzzle is impossible
+(FORWARD CHECKING)
+
+STEP 4: Valid cell set obtained
+At this point, you have:
+
+Trees
+Valid candidate cells
+Edges (tree ↔ cell)
+Row/column constraints enforced
+
+STEP 5: Sorting / prioritization (heuristics, not rules)
+Sort candidate cells by:
+
+Row remaining capacity (ascending)
+Column remaining capacity (ascending)
+Number of trees the cell is adjacent to (ascending)
+Sort trees by:
+Number of adjacent candidate cells (degree in bipartite graph) - Minimum Remaining Values (MRV) heuristic
+
+STEP 6: Matching / placement strategy
+For each tree (in sorted order):
+
+Try assigning one of its candidate cells
+After placing:
+
+: Update row/column counts
+: Eliminate adjacent/diagonal cells
+: Update graph
+: If conflict occurs → backtrack or skip
+
+Important correction:
+
+Skipping a tree is NOT allowed in final solution
+Every tree must be matched to exactly one tent
+Skipping is okay only during heuristic simulation, not solution
+
+

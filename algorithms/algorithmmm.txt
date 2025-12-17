@@ -1,0 +1,24 @@
+Initially 
+1.traverse through the graph and find out cells where tents are adjcent or diagonal(eliminate these cells, it cannot be part of V in bipartite matching)
+2.traverse and find out if each of the tents placed are already adjacent to a tree, if yes add an edge between them. Ignore cells already adjacent to another tent.
+3.While placing a tent, prune rows/columns that already reached their edge number(Remove cells that cannot be assigned due to row/column limit). if not raeached the edge number, those cells can be a part of the valid cells.
+If a row cannot possibly reach its required number, puzzle is impossible.
+--Now after all this we'll get a set of valid cells
+4.we should sort these cells according to the row column count ie. 
+example
+Row 2 needs 1 tent , its cell gets highest priority
+Row 5 needs 3 tents , cells have lower priority
+cells that have fewer conflicts with other trees (i.e fewer neighbors)are prioritized
+5.Sometimes, sorting trees by the number of candidate cells is also helpful
+Trees with fewer options are matched first
+
+
+
+
+
+
+
+
+Randomly (or using strategy) choose a valid cell to place a tent.
+If no valid cell exists → skip the tree
+
