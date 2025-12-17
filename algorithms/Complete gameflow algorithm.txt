@@ -1,0 +1,210 @@
+COMPLETE GAME FLOW ALGORITHM
+(Player vs AI – Full System Algorithm)
+
+
+ALGORITHM 0: GAME INITIALIZATION
+Step 0.1 – Start Application
+Create the GUI application.
+Initialize the game state with grid size N = 8.
+Create:
+
+Player logic
+AI logic
+Attach all logic to the GUI.
+
+ALGORITHM 1: BOARD GENERATION (SOLVABLE SETUP)
+Purpose
+To generate a valid, solvable puzzle before the game begins.
+
+Steps
+Initialize an empty N × N board.
+Randomly place a fixed number of trees on empty cells.
+For each tree:
+
+Find all valid adjacent cells.
+If no valid cell exists:
+
+Discard the board and restart generation.
+Randomly select one adjacent cell per tree:
+
+Increment row target of that cell.
+Increment column target of that cell.
+If all trees have at least one valid adjacent position:
+
+Accept the board as solvable.
+Display the board and targets in the GUI.
+
+ALGORITHM 2: MAIN GAME LOOP
+Purpose
+To alternate turns between Player and AI until no moves are possible.
+
+Steps
+Wait for Player input.
+After Player move:
+
+Validate move.
+Update board and score.
+Trigger AI move after a short delay.
+After AI move:
+
+Update board and score.
+Repeat until no valid moves remain.
+
+ALGORITHM 3: PLAYER TURN
+Purpose
+To process a player’s attempt to place a tent.
+
+Steps
+Player selects a grid cell.
+Call place_tent(row, col).
+Inside validation:
+
+Check bounds.
+Check emptiness.
+Check no adjacent tents.
+Check adjacency to unused tree.
+Check row & column limits.
+If valid:
+
+Place tent.
+Mark corresponding tree as used.
+Increase player score.
+If invalid:
+
+Reject move.
+Refresh GUI.
+
+ALGORITHM 4: AI TURN (HIGH-LEVEL)
+Purpose
+To make one intelligent move under constraints.
+
+Steps
+Lock AI execution.
+Construct bipartite graph.
+Order trees using merge sort.
+For each tree:
+
+Generate and prune candidates.
+Order candidates using insertion sort.
+Attempt greedy matching.
+Place exactly one tent.
+Update priorities.
+Unlock AI execution.
+
+ALGORITHM 5: BIPARTITE GRAPH CONSTRUCTION
+Purpose
+To model valid tree–tent relationships.
+
+Steps
+For each unused tree:
+
+Examine four adjacent cells.
+For each adjacent cell:
+
+If valid_tent() returns true:
+
+Add edge between tree and cell.
+Store adjacency list.
+
+ALGORITHM 6: TREE ORDERING (MERGE SORT)
+Purpose
+To decide which tree should be solved first.
+
+Sorting Criteria
+Fewer valid candidate cells.
+Higher row + column requirement.
+Stable positional ordering.
+Steps
+Divide tree list recursively.
+Merge sublists based on criteria.
+Produce final ordered tree list.
+
+ALGORITHM 7: CANDIDATE CELL PRUNING
+Purpose
+To reduce illegal or dangerous placements.
+
+Steps
+For each candidate cell:
+
+Reject if adjacent tent exists.
+Reject if row or column limit would exceed.
+If a row or column reaches its target:
+
+Remove all remaining candidates in that line.
+
+ALGORITHM 8: CANDIDATE CELL ORDERING (INSERTION SORT)
+Purpose
+To prioritize safer placements.
+
+Sorting Criteria
+Higher row + column need.
+Lower positional conflict.
+Steps
+Take candidate list.
+Insert each cell into correct position.
+Return sorted list.
+
+ALGORITHM 9: GREEDY BIPARTITE MATCHING
+Purpose
+To match a tree with one valid tent cell.
+
+Steps
+For current tree:
+
+Traverse sorted candidate cells.
+For each candidate:
+
+Attempt place_tent().
+On first success:
+
+Fix tent placement.
+Stop further search.
+If no match:
+
+Skip tree.
+
+ALGORITHM 10: LINE PRIORITY EVALUATION (COUNTING SORT)
+Purpose
+To track urgency of rows and columns.
+
+Steps
+For each row and column:
+
+Calculate remaining tent need.
+Bucket rows and columns by need.
+Traverse from highest need to lowest.
+Within same need:
+
+Prefer fewer free cells.
+
+ALGORITHM 11: END OF AI TURN
+Steps
+Update board state.
+Update AI score.
+Unlock AI.
+Refresh GUI.
+
+ALGORITHM 12: TERMINATION CONDITIONS
+Game Ends When
+No valid tree–cell edges exist OR
+All row and column targets are satisfied.
+
+GLOBAL TIME COMPLEXITY SUMMARY
+Component
+Complexity
+Board validation
+O(1)
+Graph construction
+O(N²)
+Tree sorting
+O(T log T)
+Candidate sorting
+O(1)
+Line priority
+O(N)
+AI move
+O(N²) worst-case
+
+
+The game is a constrained greedy bipartite matching problem solved incrementally using heuristic-guided sorting and pruning.
+
