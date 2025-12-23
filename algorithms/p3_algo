@@ -1,0 +1,308 @@
+ALGORITHM 0: GAME INITIALIZATION
+Purpose
+
+Initialize GUI, game state, and player/AI logic objects.
+
+Steps
+
+0.1 Start the application (main.py).
+0.2 Create GUI application instance.
+0.3 Initialize GameState with grid size N = 8.
+0.4 Initialize:
+
+PlayerLogic(GameState)
+
+AILogic(GameState)
+0.5 Attach GameState, Player, and AI to GameGUI.
+0.6 Display GUI window and enter event loop.
+
+📌 Matches exactly: main.py, GameGUI.__init__()
+
+ALGORITHM 1: SOLVABLE BOARD GENERATION
+Purpose
+
+Generate a guaranteed solvable initial board without backtracking.
+
+Steps
+
+1.1 Initialize empty 8×8 board.
+1.2 Reset row targets, column targets, and tree_used.
+1.3 Randomly place 10 trees on empty cells.
+1.4 For each tree:
+
+Collect all empty orthogonally adjacent cells.
+
+If no adjacent empty cell exists → discard board and restart.
+
+Randomly select one adjacent cell:
+
+Increment corresponding row target.
+
+Increment corresponding column target.
+1.5 If all trees succeed → accept board.
+1.6 Display board and row/column targets in GUI.
+
+📌 Key property:
+✔️ Board is solvable by construction, not by search.
+
+📌 Matches: GameState.generate_solvable_trees_and_targets()
+
+ALGORITHM 2: MAIN GAME LOOP (EVENT-DRIVEN)
+Purpose
+
+Alternate Player and AI turns via GUI events until termination.
+
+Steps
+
+2.1 Wait for Player click input.
+2.2 After Player move:
+
+Update board.
+
+Update player score.
+
+Check termination.
+
+Schedule AI move after short delay (300 ms).
+2.3 After AI move:
+
+Update board.
+
+Update AI score.
+
+Check termination.
+2.4 Repeat until game ends.
+
+📌 Important:
+This is event-driven, not a while loop.
+
+📌 Matches: GameGUI.cell_clicked(), QTimer.singleShot()
+
+ALGORITHM 3: PLAYER TURN (UNCONDITIONAL PLACEMENT)
+Purpose
+
+Allow free experimentation while scoring move quality.
+
+Steps
+
+3.1 Player selects a cell (r, c).
+3.2 Call player_move(r, c).
+3.3 Inside place_tent_unconditional():
+
+No strict rule enforcement.
+
+Tent is placed even if illegal.
+
+Tree is marked used if possible.
+3.4 Evaluate move using constraint-impact scoring:
+
+Eliminated cells
+
+Forced moves created
+
+Dead-end penalties
+3.5 Add returned score to player total.
+3.6 Refresh GUI.
+
+📌 Design insight:
+Player is not solving, but exploring the constraint space.
+
+📌 Matches: PlayerLogic, GameState.place_tent_unconditional()
+
+ALGORITHM 4: AI TURN (HIGH-LEVEL)
+Purpose
+
+Make exactly one intelligent, legal move per turn.
+
+Steps
+
+4.1 Lock AI execution (ai_busy = True).
+4.2 Build bipartite graph of unused trees → valid tent cells.
+4.3 Order trees using merge sort.
+4.4 For each tree:
+
+Generate candidate cells.
+
+Order candidates using insertion sort.
+
+Attempt greedy placement.
+4.5 On first successful placement:
+
+Place exactly one tent.
+
+Update line priorities.
+4.6 Unlock AI execution.
+4.7 Refresh GUI.
+
+📌 Critical:
+AI never places more than one tent per turn.
+
+📌 Matches: AILogic.ai_move()
+
+ALGORITHM 5: BIPARTITE GRAPH CONSTRUCTION
+Purpose
+
+Model valid tree–tent relationships.
+
+Steps
+
+5.1 For each unused tree (r, c):
+
+Examine 4 orthogonal neighbors.
+5.2 If valid_tent(nr, nc) is true:
+
+Add edge: tree → (nr, nc).
+5.3 Store as adjacency list:
+tree → list of candidate cells.
+
+📌 Matches: AILogic.build_bipartite_graph()
+
+ALGORITHM 6: TREE ORDERING (MERGE SORT)
+Purpose
+
+Solve the most constrained trees first.
+
+Sorting Criteria (in order)
+
+Fewer valid candidate cells (degree ↑ constraint).
+
+Higher (row_need + col_need).
+
+Stable positional ID.
+
+Steps
+
+6.1 Recursively divide tree list.
+6.2 Merge using comparison key.
+6.3 Produce ordered tree list.
+
+📌 Matches: AILogic.merge_sort()
+
+ALGORITHM 7: CANDIDATE CELL PRUNING (IMPLICIT)
+Purpose
+
+Eliminate illegal placements before sorting.
+
+Rules enforced by valid_tent():
+
+Cell empty.
+
+No adjacent tents (8-direction).
+
+Adjacent to unused tree.
+
+Row and column limits not exceeded.
+
+📌 Note:
+No explicit prune loop — pruning is rule-driven.
+
+📌 Matches: GameState.valid_tent()
+
+ALGORITHM 8: CANDIDATE CELL ORDERING (INSERTION SORT)
+Purpose
+
+Choose the safest placement first.
+
+Sorting Criteria
+
+Higher (row_need + col_need).
+
+Stable positional ID.
+
+Steps
+
+8.1 Take candidate list.
+8.2 Insert each cell into correct position.
+8.3 Return sorted candidate list.
+
+📌 Matches: AILogic.insertion_sort()
+
+ALGORITHM 9: GREEDY BIPARTITE MATCHING
+Purpose
+
+Match one tree to one tent cell.
+
+Steps
+
+9.1 For current tree:
+
+Traverse sorted candidate list.
+9.2 Attempt place_tent(r, c).
+9.3 On first success:
+
+Fix placement.
+
+Stop search.
+9.4 If no placement possible:
+
+Skip tree.
+
+📌 Important:
+This is greedy, not maximum matching.
+
+📌 Matches: AILogic.ai_move()
+
+ALGORITHM 10: LINE PRIORITY EVALUATION (COUNTING SORT)
+Purpose
+
+Track urgency of rows and columns.
+
+Steps
+
+10.1 For each row and column:
+
+Compute remaining need.
+
+Compute free valid cells.
+10.2 Bucket by remaining need.
+10.3 Traverse from highest to lowest need.
+10.4 Within same need:
+
+Prefer fewer free cells.
+10.5 Store result in line_priority.
+
+📌 Used for heuristics, not forced moves.
+
+📌 Matches: AILogic.evaluate_lines_priority()
+
+ALGORITHM 11: END OF AI TURN
+Steps
+
+11.1 Update board state.
+11.2 Update AI score (if used).
+11.3 Unlock AI.
+11.4 Refresh GUI.
+
+📌 Matches: GameGUI.ai_turn()
+
+ALGORITHM 12: TERMINATION CONDITIONS
+Game Ends When
+
+All trees are used OR
+
+Board has fewer than 3 empty cells.
+
+📌 Winner decided by cumulative evaluation score.
+
+📌 Matches: GameGUI.is_game_over()
+
+GLOBAL TIME COMPLEXITY (ACTUAL)
+Component	Complexity
+Board validation	O(1)
+Graph construction	O(N²)
+Tree sorting	O(T log T)
+Candidate sorting	O(1) (≤4 cells)
+Line priority	O(N)
+AI move (worst-case)	O(N²)
+FINAL SYSTEM INTERPRETATION
+
+Your current game is not a solver.
+
+It is a:
+
+Turn-based constrained greedy bipartite matching system with heuristic-guided local optimization and constraint-impact scoring
+
+✔ No backtracking
+✔ No DFS/maximum matching
+✔ One tent per AI turn
+✔ Human exploration vs heuristi
